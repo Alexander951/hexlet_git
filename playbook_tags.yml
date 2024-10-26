@@ -1,0 +1,56 @@
+- name: test tags
+  hosts: server_ubuntu
+
+  tasks:
+    - name: update cache 
+      ansible.builtin.apt:
+        update_cache: yes
+      become: yes
+      tags: update
+
+    - name: install Git
+      ansible.builtin.apt:
+        name: git
+        state: present
+      become: yes
+      tags: app
+    
+    - name: install Make
+      ansible.builtin.apt:
+        name: make
+        state: present
+      become: yes
+      tags: app
+
+    - name: Add user arya
+      ansible.builtin.user:
+        name: arya
+        state: absent
+        #password: "{{ '1111' | password_hash('sha512', 'mysecretsalt') }}"
+        password: "1111"
+        shell: /bin/bash
+        create_home: yes
+      become: yes
+      tags: user
+
+    - name: Add user sansa
+      ansible.builtin.user:
+        name: sansa
+        state: absent
+        #password: "{{ '1111' | password_hash('sha512', 'mysecretsalt') }}"
+        password: "1111"
+        shell: /bin/bash
+        create_home: yes
+      become: yes
+      tags: user
+
+    - name: Add user tirion
+      ansible.builtin.user:
+        name: tirion
+        state: absent
+        #password: "{{ '1111' | password_hash('sha512', 'mysecretsalt') }}"
+        password: "1111"
+        shell: /bin/bash
+        create_home: yes
+      become: yes
+      tags: user
