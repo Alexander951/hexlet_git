@@ -1,0 +1,41 @@
+- name: Create user loop
+  hosts: server_ubuntu
+  become: true
+  become_user: root
+  #become_method: su
+
+  vars:
+    users:
+      - "jaime"
+      - "sansa"
+      - "robert"
+  
+  tasks:
+    - name: Add users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+        password: "{{ '1111' | password_hash('sha512') }}"
+        shell: /bin/bash
+        create_home: yes
+      loop: "{{ users }}"
+
+    - name: update git config
+      ansible.builtin.template:
+        src: templates/.gitconfig.j2
+        dest: "/home/{{ item }}/.gitconfig"
+      loop: "{{ users }}"
+
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: "/home/{{ item }}/.ssh/authorized_keys/"
+        state: directory
+        mode: '0755'
+      loop: "{{ users }}"
+
+
+    - name: Copy public key
+      ansible.builtin.copy:
+        src: files/id_ed25519.pub
+        dest: "/home/{{ item }}/.ssh/authorized_keys/id_ed25519.pub"
+      loop: "{{ users }}"
