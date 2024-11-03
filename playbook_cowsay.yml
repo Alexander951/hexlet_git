@@ -1,0 +1,59 @@
+ - hosts: server_ubuntu
+ 
+   become: yes
+
+   vars:
+    root_dir: /usr/share/nginx/html
+    nginx_port: 80
+    title: "This is server {{ ansible_facts['hostname'] }}!"
+    mydate: "{{ ansible_date_time.date }}"
+
+   tasks:
+
+    - name: install cowsay
+      ansible.builtin.apt:
+        name: cowsay
+        state: latest
+        update_cache: yes
+      become: yes
+
+    - name: install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+      become: yes
+
+    - name: update nginx config
+      ansible.builtin.template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify:
+        - restart nginx
+      become: yes
+
+    - name: test fact
+      debug:
+        msg: "This is server {{ ansible_facts['hostname'] }}!"
+
+    - name: Command cowsay
+      ansible.builtin.shell: /usr/games/cowsay "{{server_name}}"
+      register: cowsay_result
+      ignore_errors: yes
+
+    - name: print var cowsay_result
+      ansible.builtin.debug:
+        var: cowsay_result
+
+    - name: copy HTML
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: /usr/share/nginx/html/index.html
+
+ 
+   handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: yes
